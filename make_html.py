@@ -14,30 +14,63 @@ users = tuple(user_2_avatar)
 events = ghfeed.get_events(users)
 events = [
     event for event in events
-    if (datetime.date.today() - datetime.datetime.strptime(event[0], '%Y-%m-%d').date()).days < 5
+    if (datetime.date.today() - datetime.datetime.fromisoformat(event['timestamp'][:-1]).date()).days < 3
 ]
 
-feed = ''
+user_events = (
+    events
+    | P.GroupBy(operator.itemgetter('user'))
+    | P.MapValues(lambda it: sorted(it, key=operator.itemgetter('timestamp'), reverse=True))
+    | P.Pipe(lambda it: sorted(it, key=lambda kv: kv[1][0]['timestamp'], reverse=True))
+)
 
-g0 = P.GroupBy(operator.itemgetter(0))
-for day, day_events in events | g0:
-    feed += f'<h2>{day}</h1>\n'
-    day_events = day_events | P.Map(operator.itemgetter(1, 2, 3)) | P.Pipe(list)
-    for user, user_events in day_events | g0:
-        feed += f'''
-        <a href='https://github.com/{user}'>
-            <img src='{user_2_avatar[user]}&s=64'>
-            <h3>{user}</h3>
-        </a>
+
+class User:
+    def __init__(self, username, events):
+        self.username = username
+        self.events = events
+        self.avatar_url = user_2_avatar[user]
+
+    @property
+    def events_html(self):
+        html = ''
+
+        for event in self.events:
+            timestamp = f"<code>{datetime.datetime.fromisoformat(event['timestamp'][:-1]).strftime('%Y-%m-%d %H:%M')}</code>"
+            event_type = f"<code>{event['type']}</code>"
+            repo = f"<code>{event['repo']}</code>"
+
+            if event['type'] == 'PushEvent':
+                for commit in event['url']:
+                    html += f'''
+                    <li>{timestamp} | {event_type} {repo} <a href='{commit['url']}'>{commit['message']}</a></li>
+                    '''
+            elif event['type'] == 'CreateEvent':
+                html += f'''
+                <li>{timestamp} | {event_type} {repo} {event['url']['type']} <a href='{event['url']['url']}'>{event['url']['url']}</a></li>
+                '''
+            else:
+                html += f'''
+                <li>{timestamp} | {event_type} {repo} <a href='{event['url']}'>{event['url'].split('https://github.com/')[1]}</a></li>
+                '''
+
+        return f'''
+        <ul class='user_events'>
+        {html}
+        </ul>
         '''
 
-        user_events = user_events | P.Map(operator.itemgetter(1, 2)) | P.Pipe(list)
-        for repo, repo_events in user_events | g0:
-            repo_events = repo_events | P.Map(operator.itemgetter(1)) | P.Pipe(collections.Counter)
-            repo_events = ' '.join(f'{e}: {n}' for e, n in sorted(repo_events.items()))
-            feed += f"<a href='https://github.com/{repo}'><span>{repo}: {repo_events}</span></a>\n"
-            # print(day, user, repo, repo_events)
-    feed += '<hr>\n\n'
+    def _repr_html_(self):
+        return f'''
+        <div class='user card'>
+            <span class='user_header'><a href='https://github.com/{self.username}'><img src='{self.avatar_url}&s=64'><h3>{self.username}</h3></a></span>
+            {self.events_html}
+        </div>
+        '''
 
+
+feed = ''
+for user, u_events in user_events:
+    feed += User(user, u_events)._repr_html_()
 html = string.Template(open('template.html').read()).substitute(feed=feed)
 open('index.html', 'w').write(html)
