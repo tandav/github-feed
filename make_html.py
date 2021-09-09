@@ -36,7 +36,8 @@ class User:
         html = ''
 
         for event in self.events:
-            timestamp = f"<code>{datetime.datetime.fromisoformat(event['timestamp'][:-1]).strftime('%Y-%m-%d %H:%M')}</code>"
+            # timestamp = f"<code>{datetime.datetime.fromisoformat(event['timestamp'][:-1]).strftime('%Y-%m-%d %H:%M')}</code>"
+            timestamp = f"<code>{event['ago']}</code>"
             event_type = f"<code>{event['type']}</code>"
             repo = f"<code>{event['repo']}</code>"
 
@@ -45,7 +46,7 @@ class User:
                     html += f'''
                     <li>{timestamp} | {event_type} {repo} <a href='{commit['url']}'>{commit['message']}</a></li>
                     '''
-            elif event['type'] == 'CreateEvent':
+            elif event['type'] in {'CreateEvent', 'DeleteEvent'}:
                 html += f'''
                 <li>{timestamp} | {event_type} {repo} {event['url']['type']} <a href='{event['url']['url']}'>{event['url']['url']}</a></li>
                 '''

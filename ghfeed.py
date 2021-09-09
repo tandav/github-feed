@@ -1,6 +1,7 @@
 import operator
 
 import requests
+import datetime
 import tqdm
 from collections.abc import Iterable
 from typing import Union
@@ -8,6 +9,7 @@ from typing import Optional
 
 from credentials import user_token
 import pipe21 as P
+import util
 
 
 def get_following(
@@ -56,7 +58,6 @@ def get_event_url(event):
     # elif t == 'IssueCommentEvent': return event['payload']['issue']['url']
     elif t == 'WatchEvent': return event['repo']['url'].replace('//api.', '//').replace('/repos', '')
     elif t == 'PublicEvent': return f"https://github.com/{event['repo']['name']}"
-    elif t == 'DeleteEvent': return f"https://github.com/{event['repo']['name']}"
     elif t == 'PushEvent': return commits_info(event['payload']['commits'])
     elif t == 'ReleaseEvent': return event['payload']['release']['html_url']
     elif t == 'PullRequestEvent': return event['payload']['pull_request']['url'].replace('//api.', '//').replace('/repos', '')
@@ -65,6 +66,8 @@ def get_event_url(event):
     elif t == 'ForkEvent': return event['payload']['forkee']['html_url']
     elif t in {'IssueCommentEvent', 'CommitCommentEvent'}: return event['payload']['comment']['html_url']
     elif t == 'CreateEvent': return create_event_info(event)
+    elif t == 'DeleteEvent': return create_event_info(event)
+    # elif t == 'DeleteEvent': return f"https://github.com/{event['repo']['name']}"
     else: raise TypeError(f'cant handle event of type {t}')
 
 
@@ -87,6 +90,7 @@ def get_events_raw(user: Union[str, Iterable]) -> list:
         raise TypeError
 
 def get_events(user: Union[str, Iterable]) -> list:
+    now = datetime.datetime.utcnow()
     return (
         get_events_raw(user)
         | P.Filter(lambda e: e['type'] not in not_supported_events_yet)
@@ -94,6 +98,7 @@ def get_events(user: Union[str, Iterable]) -> list:
             user = e['actor']['login'],
             date = e['created_at'].split('T')[0],
             timestamp = e['created_at'],
+            ago = util.ago((now - datetime.datetime.fromisoformat(e['created_at'][:-1])).total_seconds()),
             repo = e['repo']['name'],
             type = e['type'],
             url = get_event_url(e))
