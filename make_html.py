@@ -3,33 +3,17 @@ import operator
 import string
 import collections
 import pipe21 as P
-
 import ghfeed
 
 
-user_2_avatar = dict(ghfeed.get_following('tandav', pages=(1, 2), fields=('login', 'avatar_url')))
-len(user_2_avatar)
 
-users = tuple(user_2_avatar)
-events = ghfeed.get_events(users)
-events = [
-    event for event in events
-    if (datetime.date.today() - datetime.datetime.fromisoformat(event['timestamp'][:-1]).date()).days < 3
-]
-
-user_events = (
-    events
-    | P.GroupBy(operator.itemgetter('user'))
-    | P.MapValues(lambda it: sorted(it, key=operator.itemgetter('timestamp'), reverse=True))
-    | P.Pipe(lambda it: sorted(it, key=lambda kv: kv[1][0]['timestamp'], reverse=True))
-)
 
 
 class User:
-    def __init__(self, username, events):
+    def __init__(self, username, events, avatar_url):
         self.username = username
         self.events = events
-        self.avatar_url = user_2_avatar[user]
+        self.avatar_url = avatar_url
 
     @property
     def events_html(self):
@@ -70,8 +54,33 @@ class User:
         '''
 
 
-feed = ''
-for user, u_events in user_events:
-    feed += User(user, u_events)._repr_html_()
-html = string.Template(open('template.html').read()).substitute(feed=feed)
-open('index.html', 'w').write(html)
+
+
+def main():
+    user_2_avatar = dict(ghfeed.get_following('tandav', pages=(1, 2), fields=('login', 'avatar_url')))
+    len(user_2_avatar)
+
+    users = tuple(user_2_avatar)
+    events = ghfeed.get_events(users)
+    events = [
+        event for event in events
+        if (datetime.date.today() - datetime.datetime.fromisoformat(event['timestamp'][:-1]).date()).days < 3
+    ]
+
+    user_events = (
+        events
+        | P.GroupBy(operator.itemgetter('user'))
+        | P.MapValues(lambda it: sorted(it, key=operator.itemgetter('timestamp'), reverse=True))
+        | P.Pipe(lambda it: sorted(it, key=lambda kv: kv[1][0]['timestamp'], reverse=True))
+    )
+
+    feed = ''
+    for user, u_events in user_events:
+        feed += User(user, u_events, user_2_avatar[user])._repr_html_()
+    html = string.Template(open('template.html').read()).substitute(
+        updated=int(datetime.datetime.now().timestamp()) * 1000, feed=feed)
+    open('index.html', 'w').write(html)
+
+
+if __name__ == '__main__':
+    main()

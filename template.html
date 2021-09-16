@@ -1,3 +1,4 @@
+<span id='updated'>$updated</span>
 <div class='feed'>
 $feed
 </div>
@@ -30,3 +31,17 @@ img {
 
 </style>
 
+<script>
+const ago = e => {
+  var t = Math.round(e / 1e3)
+    , n = Math.round(t / 60)
+    , r = Math.round(n / 60)
+    , o = Math.round(r / 24)
+    , i = Math.round(o / 30)
+    , a = Math.round(i / 12);
+  return e < 0 ? 'just now' : t < 10 ? 'just now' : t < 45 ? t + ' seconds ago' : t < 90 ? 'a minute ago' : n < 45 ? n + ' minutes ago' : n < 90 ? 'an hour ago' : r < 24 ? r + ' hours ago' : r < 36 ? 'a day ago' : o < 30 ? o + ' days ago' : o < 45 ? 'a month ago' : i < 12 ? i + ' months ago' : i < 18 ? 'a year ago' : a + ' years ago'
+}
+// document.getElementById('updated').textContent = 'updated: ' + ago((new Date).getTime() - new Date(json.updated_at))
+document.getElementById('updated').textContent = 'updated: ' + ago((new Date).getTime() - parseInt(document.getElementById('updated').textContent))
+console.log()
+</script>
