@@ -8,7 +8,9 @@ import time
 
 def update_html():
     while True:
+        print('start')
         make_html()
+        print('stop')
         time.sleep(60)
 
 
