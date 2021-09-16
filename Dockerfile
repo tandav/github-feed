@@ -2,8 +2,7 @@ FROM python:3
 
 EXPOSE 5001
 
-COPY *.py /app/
-COPY *.pem /app/
+COPY template.html *.py *.pem /app/
 WORKDIR /app
 
 RUN pip install fastapi uvicorn requests tqdm pipe21 && python3 sheduler.py &
