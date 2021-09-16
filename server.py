@@ -1,21 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from make_html import main as make_html
 from pathlib import Path
-import concurrent.futures
-import time
-
-
-def update_html():
-    while True:
-        print('start')
-        make_html()
-        print('stop')
-        time.sleep(60)
-
-
-with concurrent.futures.ThreadPoolExecutor() as pool:
-    pool.submit(update_html)
 
 
 html = Path('index.html')
