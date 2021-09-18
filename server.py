@@ -87,7 +87,5 @@ async def root():
     feed = ''
     for user, u_events in user_events:
         feed += User(user, u_events, user_2_avatar[user])._repr_html_()
-    html = string.Template(open('template.html').read()).substitute(
-        updated=int(datetime.datetime.now().timestamp()) * 1000, feed=feed
-    )
+    html = string.Template(open('template.html').read()).substitute(updated=data['updated'], feed=feed)
     return html

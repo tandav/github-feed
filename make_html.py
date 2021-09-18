@@ -1,5 +1,6 @@
 import json
 import time
+import datetime
 
 import credentials
 import ghfeed
@@ -11,7 +12,11 @@ def make_json():
     users = tuple(user_2_avatar)
     events = ghfeed.get_events(users)
 
-    data = {'user_2_avatar': user_2_avatar, 'events': events}
+    data = {
+        'user_2_avatar': user_2_avatar,
+        'events': events,
+        'updated': int(datetime.datetime.now().timestamp()) * 1000,
+    }
     with open('data.json', 'w') as f:
         json.dump(data, f, ensure_ascii=False, separators=(',', ':'))
 
