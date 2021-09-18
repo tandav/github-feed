@@ -4,7 +4,7 @@ html:
 
 run:
 	python3 make_html.py &
-	uvicorn server:app --host 0.0.0.0 --port 5001
+	uvicorn server:app --host 0.0.0.0 --port 5001 --ssl-certfile fullchain.pem --ssl-keyfile privkey.pem
 
 lint:
 	python3 -m isort --force-single-line-imports .
