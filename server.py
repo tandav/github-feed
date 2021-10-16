@@ -12,6 +12,7 @@ import util
 
 app = FastAPI()
 
+HTML_TEMPLATE = string.Template(open('template.html').read())
 
 class User:
     def __init__(self, username, events, avatar_url):
@@ -54,7 +55,7 @@ class User:
     def _repr_html_(self):
         return f'''
         <div class='user card'>
-            <span class='user_header'><a href='https://github.com/{self.username}'><img src='{self.avatar_url}&s=64'><h3>{self.username}</h3></a></span>
+            <a class='user_header' href='https://github.com/{self.username}'><img src='{self.avatar_url}&s=64'><h1 class='username'>{self.username}</h1></a>
             {self.events_html}
         </div>
         '''
@@ -87,5 +88,4 @@ async def root():
     feed = ''
     for user, u_events in user_events:
         feed += User(user, u_events, user_2_avatar[user])._repr_html_()
-    html = string.Template(open('template.html').read()).substitute(updated=data['updated'], feed=feed)
-    return html
+    return HTML_TEMPLATE.substitute(updated=data['updated'], feed=feed)
