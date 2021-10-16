@@ -10,6 +10,10 @@ import tqdm
 from credentials import user_token
 
 
+def user_info(user: str) -> dict:
+    return requests.get(f'https://api.github.com/users/{user}', auth=user_token).json()
+
+
 def get_following(
     user: str,
     pages: tuple,

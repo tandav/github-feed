@@ -8,8 +8,8 @@ import ghfeed
 
 def make_json():
     user_2_avatar = dict(ghfeed.get_following(credentials.user, pages=(1, 2), fields=('login', 'avatar_url')))
-    user_2_avatar[credentials.user] = 'https://via.placeholder.com/400'
-    users = tuple(user_2_avatar) + (credentials.user,)
+    user_2_avatar[credentials.user] = ghfeed.user_info(credentials.user)['avatar_url']
+    users = tuple(user_2_avatar)
     events = ghfeed.get_events(users)
 
     data = {
