@@ -37,7 +37,9 @@ def commits_info(commits):
     out = []
     for commit in commits:
         url = commit['url'].replace('//api.', '//').replace('/repos', '').replace('/commits', '/commit')
-        message = commit['message'].splitlines()[0]
+        message = commit['message']
+        if message:
+            message = message.splitlines()[0]
         out.append({'url': url, 'message': message})
     return out
 
