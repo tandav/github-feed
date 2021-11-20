@@ -3,6 +3,7 @@ import json
 import operator
 import string
 from pathlib import Path
+from typing import Optional
 
 import pipe21 as P
 from fastapi import FastAPI
@@ -64,8 +65,7 @@ class User:
 data_file = Path('data.json')
 
 
-@app.get("/", response_class=HTMLResponse)
-async def root():
+def recent_events(username: Optional[str] = None):
     if not data_file.exists():
         return 'page is creating, please reload page after 1-2 minutes'
 
@@ -78,6 +78,9 @@ async def root():
         if (datetime.date.today() - datetime.datetime.fromisoformat(event['timestamp'][:-1]).date()).days < 3
     ]
 
+    if username is not None:
+        events = events | P.Filter(lambda event: event['user'] == username)
+
     user_events = (
         events
         | P.GroupBy(operator.itemgetter('user'))
@@ -89,3 +92,13 @@ async def root():
     for user, u_events in user_events:
         feed += User(user, u_events, user_2_avatar[user])._repr_html_()
     return HTML_TEMPLATE.substitute(updated=data['updated'], feed=feed)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return recent_events()
+
+
+@app.get('/username/{username}', response_class=HTMLResponse)
+async def userfeed(username: str):
+    return recent_events(username)
