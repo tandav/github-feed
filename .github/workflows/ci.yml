@@ -21,7 +21,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: tandav/github_feed:latest
+          tags: tandav/github-feed:latest
 
   deploy:
     name: deploy to server
