@@ -36,15 +36,15 @@ class User:
             if event['type'] == 'PushEvent':
                 for commit in event['url']:
                     html += f'''
-                    <li>{timestamp} | {event_type} {repo} <a href='{commit['url']}'>{commit['message']}</a></li>
+                    <li>{timestamp} | {event_type} {repo} <a target='_blank' href='{commit['url']}'>{commit['message']}</a></li>
                     '''
             elif event['type'] in {'CreateEvent', 'DeleteEvent'}:
                 html += f'''
-                <li>{timestamp} | {event_type} {repo} {event['url']['type']} <a href='{event['url']['url']}'>{event['url']['url']}</a></li>
+                <li>{timestamp} | {event_type} {repo} {event['url']['type']} <a target='_blank' href='{event['url']['url']}'>{event['url']['url']}</a></li>
                 '''
             else:
                 html += f'''
-                <li>{timestamp} | {event_type} {repo} <a href='{event['url']}'>{event['url'].split('https://github.com/')[1]}</a></li>
+                <li>{timestamp} | {event_type} {repo} <a target='_blank' href='{event['url']}'>{event['url'].split('https://github.com/')[1]}</a></li>
                 '''
 
         return f'''
@@ -56,7 +56,7 @@ class User:
     def _repr_html_(self):
         return f'''
         <div class='user card'>
-            <a class='user_header' href='https://github.com/{self.username}'><img src='{self.avatar_url}&s=64'><h1 class='username'>{self.username}</h1></a>
+            <a class='user_header' target='_blank' href='https://github.com/{self.username}'><img src='{self.avatar_url}&s=64'><h1 class='username'>{self.username}</h1></a>
             {self.events_html}
         </div>
         '''
