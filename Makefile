@@ -1,13 +1,13 @@
-python = python3.9
+python = python3.10
 
 .PHONY: html
 html:
-	python make_html.py
+	$(python) make_html.py
 	# open index.html
 
 .PHONY: run
 run:
-	python make_html.py &
+	$(python) make_html.py &
 	uvicorn server:app --host 0.0.0.0 --port 5001 --ssl-certfile fullchain.pem --ssl-keyfile privkey.pem
 
 .PHONY: lint
@@ -17,5 +17,5 @@ lint:
 
 .PHONY: run_no_ssl
 run_no_ssl:
-	python make_html.py &
-	uvicorn server:app --host 0.0.0.0 --port 5001
+	$(python) make_html.py &
+	$(python) -m uvicorn server:app --host 0.0.0.0 --port 5001

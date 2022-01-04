@@ -26,5 +26,6 @@ if __name__ == '__main__':
         try:
             make_json()
         except Exception as e:
-            print(f'error while make_json():\n{e}')
+            print('error while make_json():')
+            print(e)
         time.sleep(60 * 10)
